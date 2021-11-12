@@ -3,30 +3,30 @@
 
 class Database{
     
-    protected function connect(){
-        echo "Database : connect<br>";
+    protected static function connect(){
+        //echo "Database : connect<br>";
         
         $host = 'localhost';
         $username = 'root';
         $password = 'root';
-        $database = 'university';
+        $database = 'social';
 
         $connection = mysqli_connect($host,$username,$password,$database);
 
         if($connection){
-           // echo "We are connected!<br>";
+            //echo "We are connected!<br>";
         }else {
             die ("Database connection failed");
         }
         return $connection;
     }
     
-    protected function disconnect($connection){
+    protected static function disconnect($connection){
         mysqli_close($connection);
     }
     
-    protected function readFromTable($tableName){
-        echo "Database:readFromTable<br>";
+    protected static function readFromTable($tableName){
+        //echo "Database:readFromTable<br>";
         $connection = Database::connect();
         //query the database
         $query = "SELECT * FROM $tableName";
@@ -54,12 +54,10 @@ class Database{
     }
     
     // sanitize input
-    protected function cleanVar($var, $connection){
+    protected static function cleanVar($var, $connection){
 
     }
     
 }
-
-
 
 ?>
