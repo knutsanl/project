@@ -46,5 +46,66 @@ You could also consider putting the login form in a function such as displayLogi
 
 */
 
+$username = $password = '';
+// Array to save error messages
+$errors = ['username'=>'','password'=>''];
+
+if(isset($_POST['submit'])){
+    
+    $username         = $_POST['username'];
+    $password         = $_POST['password'];
+    //$user = new User('','','','');
+
+    // Check that all input fields are not empty
+    // Check email
+    if(empty($username)){
+        $errors['username'] = 'Username can not be empty';
+    }else{
+        // converts characters to HTML entities and trim spaces
+        $username = htmlspecialchars(trim($username));
+    }
+    // Check password
+    if(empty($password)){
+        $errors['password'] = 'password can not be empty';
+    }else{
+        $password = htmlspecialchars(trim($password));
+        
+    }
+    // check if there is an error by cycling through the array and perfome a call back
+    if(array_filter($errors)){
+    }else{
+        User::loginUser($username,$password);
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/style.css">
+    <title>Sgin In </title>
+</head>
+<body>
+        <div id="main">
+        <h1>Sign In</h1>
+        <form class="input" action="" method="post">
+           <span class="details">Username</span> 
+            <input class="input" type="text" name="username" placeholder="Enter username or email address" value="<?php echo $username?>" autofocus>
+            <span style="color:red; margin-top:5px;;"><?php echo $errors['username']?></span>
+            <span class="details">Password </span> 
+            <input class="input" type="password" name="password" placeholder="Enter your password"  value="<?php echo $password?>">
+            <span style="color:red; margin-top:5px;"><?php echo $errors['password']?></span>
+            <span id="cb">Remember me<input id="chceckbox" type="checkbox" name="check"></span>
+            <button name="submit" style="cursor:pointer">Sign In</button>
+            <span>Create an account</span> 
+            <button><a href="register.php">Sign Up</a></button> 
+        </form>
+    </div>
+    
+</body>
+</html>
+
 
 ?>
