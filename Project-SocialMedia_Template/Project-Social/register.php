@@ -33,4 +33,107 @@ Step 4 : Display a redirect link to the login page, where the user can now login
 
 */
 
+
+// Keep input field value empty when loading the page 
+$firstName = $surName = $email = $password = $confirmPassword = '';
+// Array to update errors if there is error. Keep the value empty and update it with error
+$errors = ['firstname'=>'','surname'=>'','email'=>'','password'=>'','confirmpassword'=>''];
+
+// check if the form has been submitted
+if(isset($_POST['submit'])){
+    $firstName        = $_POST['firstname'];
+    $surName          = $_POST['surname'];
+    $email            = $_POST['email'];
+    $password         = $_POST['password'];
+    $confirmPassword  = $_POST['confirmpassword'];
+    $user = new User($firstName, $surName, $email, $password);
+
+    
+    // Check that all input fields are not empty
+    // Check if first name not empty 
+    if(empty($firstName)){
+        $errors['firstname'] = 'First Name can not be empty';
+    }else{
+        // converts characters to HTML entities and trim spaces
+        $firstName = htmlspecialchars(trim($firstName));
+    }
+    // Check Surname
+    if(empty($surName)){
+        $errors['surname'] =  'Surname can not be empty';
+    }else{
+        $surName = htmlspecialchars(trim($surName));
+    }
+    // Check email
+    if(empty($email)){
+        $errors['email'] = 'Email can not be empty';
+    }else{
+        // check if valid email address
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            $errors['email'] =  'Enter valid email address';
+        }
+        $email = htmlspecialchars(trim($email));
+    }
+    // Check password
+    if(empty($password)){
+        $errors['password'] = 'Password can not be empty';
+    }elseif(strlen($password) < 8){
+        $errors['password'] =  'Password can not be less than 8 characters';
+    }elseif($password != $confirmPassword){
+        $errors['confirmpassword'] = 'Password should match';
+    }else{
+        $password = htmlspecialchars(trim($password));
+    }
+    if(empty($confirmPassword)){
+        $errors['confirmpassword'] = 'Confirm password can not be empty';
+    }
+     // check if there is an error by cycling through the array and perfome a call back
+     if(array_filter($errors)){
+    }else{
+        $user->isAccountExists($email);
+    }
+   
+}// end of the POST check
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/style.css">
+    <title>Sign Up</title>
+</head>
+<body>
+    <div id="main">
+        <h1>Sign Up</h1>
+    <!-- registeration form -->
+        <form action="register.php" method="post">
+            
+            <span class="details">First Name</span> 
+            <input type="text" name="firstname" placeholder="Enter your first name" value="<?php echo $firstName // saving the value that the user entered?>" autofocus>
+            <span style="color:red;margin-top:5px;"><?php echo $errors['firstname']?></span>
+            <span class="details">Surname</span> 
+            <input type="text" name="surname" placeholder="Enter your last username" value="<?php echo $surName?>">
+            <span style="color:red;margin-top:5px;"><?php echo $errors['surname']?></span>
+            <span class="details">Email</span> 
+            <input type="text" name="email" placeholder="Enter your email" value="<?php echo $email?>">
+            <span style="color:red;margin-top:5px;"><?php echo $errors['email']?></span>
+            <span class="details">Password </span> 
+            <input type="password" name="password" placeholder="Enter password" value="<?php echo $password?>">
+            <span style="color:red;margin-top:5px;"><?php echo $errors['password']?></span>
+            <span class="details">Confirm Password</span> 
+            <input type="password" name="confirmpassword" placeholder="confirm password" value="<?php echo $confirmPassword?>">
+            <span style="color:red;margin-top:5px;"><?php echo $errors['confirmpassword']?></span>
+            <button name="submit" style="cursor:pointer">Sign Up</button>
+            <span>Already have an account?</span> 
+            <button><a href="login.php">Login</a></button> 
+
+            <!-- <input type="submit" name="submit" value="Sign Up"> -->
+        </form>
+    </div>
+    
+</body>
+</html>
+
 ?>
