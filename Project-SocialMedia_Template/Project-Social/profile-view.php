@@ -1,4 +1,16 @@
-<? // Profile - view
+<?php
+require_once "classes/class_Profile.php";
+
+/*
+session_start()
+$_SESSION['userID'] = $userID;
+$_SESSION['name'] = $name;
+$_SESSION['surname'] = $surname;
+$_SESSION['loginStatus'] = TRUE;
+$ip = $_SESSION['PHpSESSID']['ip'] = $ipAddress;
+
+$profile1 = new Profile($userID,$isLoggedIn);
+// Profile - view
 /*
 
 Step 1 
@@ -42,3 +54,53 @@ After destroying the session, redirect the user to the login.php page. HINT : us
 
 
 ?>
+<!DOCTYPE html>
+    <html>
+    <head>
+        <title> Profile Page </title>
+        <style type="text/css">
+            #blue_bar{
+                height: 50px;
+                background-color: #405d9b;
+                color: white;
+            }
+            #searchBox{
+                width:400px;
+                height: 20px;
+            }
+            #friendList{
+                width: 300px;
+                min-height: 400px;
+                display:inline-block;
+                background-color: orange;
+            } 
+            #profileInformation{
+                width: 900px;
+                min-height: 400px;
+                display:inline-block;
+                background-color: yellow;
+            }
+            #editProfile{
+
+            }
+           
+        </style>
+    </head>
+    <body>
+        <div id="blue_bar">
+            <div style="width: 800px;margin:auto;font-size:30px;">
+               Profile Page <input type ="text" id="searchBox" placeholder="Search...">
+        </div> 
+        <button id="editProfile"> Edit</button>
+        </div>
+       
+        <div id="friendList"> 
+
+        </div>
+        <div id="profileInformation">
+
+        </div>
+        
+            
+    </body>
+</html>

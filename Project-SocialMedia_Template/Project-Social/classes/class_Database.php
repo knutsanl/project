@@ -1,63 +1,63 @@
 <?php // superclass definition : Database
 // contains Database related methods. 
-
-class Database{
     
-    protected static function connect(){
-        //echo "Database : connect<br>";
+    class Database{
+    
+        protected static function connect(){
+            echo "Database : connect<br>";
+            
+            $host = 'localhost';
+            $username = 'root';
+            $password = 'root';
+            $database = 'social';
+    
+            $connection = mysqli_connect($host,$username,$password,$database);
+    
+            if($connection){
+                //echo "We are connected!<br>";
+            }else {
+                die ("Database connection failed");
+            }
+            return $connection;
+        }
         
-        $host = 'localhost';
-        $username = 'root';
-        $password = 'root';
-        $database = 'social';
-
-        $connection = mysqli_connect($host,$username,$password,$database);
-
-        if($connection){
-            //echo "We are connected!<br>";
-        }else {
-            die ("Database connection failed");
+        protected static function disconnect($connection){
+            mysqli_close($connection);
         }
-        return $connection;
-    }
+        
+        protected static function readFromTable($tableName){
+            //echo "Database:readFromTable<br>";
+            $connection = Database::connect();
+            //query the database
+            $query = "SELECT * FROM $tableName";
     
-    protected static function disconnect($connection){
-        mysqli_close($connection);
-    }
+            $result = mysqli_query($connection, $query);
     
-    protected static function readFromTable($tableName){
-        //echo "Database:readFromTable<br>";
-        $connection = Database::connect();
-        //query the database
-        $query = "SELECT * FROM $tableName";
-
-        $result = mysqli_query($connection, $query);
-
-        // printing error message in case of query failure
-        if(!$result){
-            die('Query failed!' . mysqli_error($connection));
-        }else {
-            //echo "Entries Retrieved!<br>";
+            // printing error message in case of query failure
+            if(!$result){
+                die('Query failed!' . mysqli_error($connection));
+            }else {
+                //echo "Entries Retrieved!<br>";
+            }
+    
+            //read 1 row at a time
+            $idx = 0;
+            while($row=mysqli_fetch_assoc($result)){
+                //print_r($row);echo "<br>";
+                $resArray[$idx] = $row;
+                $idx++;
+            }
+    
+            Database::disconnect($connection);
+            return $resArray;
+    
         }
-
-        //read 1 row at a time
-        $idx = 0;
-        while($row=mysqli_fetch_assoc($result)){
-            //print_r($row);echo "<br>";
-            $resArray[$idx] = $row;
-            $idx++;
+        
+        // sanitize input
+        protected static function cleanVar($var, $connection){
+    
         }
-
-        Database::disconnect($connection);
-        return $resArray;
-
+        
     }
-    
-    // sanitize input
-    protected static function cleanVar($var, $connection){
-
-    }
-    
-}
 
 ?>
