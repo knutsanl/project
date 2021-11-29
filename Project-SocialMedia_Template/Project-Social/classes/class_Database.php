@@ -55,7 +55,11 @@
         
         // sanitize input
         protected static function cleanVar($var, $connection){
-    
+             $var = stripcslashes($var);
+             $var = htmlentities($var);
+             $var = strip_tags($var);
+             $var = trim($var);
+             return $var;
         }
         
     }
