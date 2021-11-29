@@ -1,7 +1,4 @@
 <?php
-// Start the session
-session_start();
-
 require_once "class_Database.php";
 class User extends Database {
     
@@ -9,83 +6,94 @@ class User extends Database {
     protected $firstname;
     protected $lastname;
     protected $email;
-    private $password;
+    private   $password;
     //derived properties
-    private $userID;
+    private   $userID;
     
     //other properties
     protected $DOB; //date of birth
     protected $gender; // 0 for male, 1 for female
     protected $profilePictureID; 
 
-    
     function __construct($firstname,$lastname,$email,$password){
-        
         // echo "USER : Constructor!<br>";
-        
         $this->firstname = $firstname;
-        $this->lastname = $lastname;
-        $this->email = $email;
-        $this->password = $password;
-        
-                        
+        $this->lastname  = $lastname;
+        $this->email     = $email;
+        $this->password  = $password;                 
     }
+
     // create User methods
     protected function createUser($firstname,$lastname){
         echo "User : In createUser<br>";
-        
-        $this->generateUserID($firstname,$lastname);
-                
-        echo "userID : $this->userID <br>";
-        echo "email : $this->email<br>";
+        echo "userID :   $this->userID <br>";
+        echo "email :    $this->email<br>";
         echo "password : $this->password <br>";
-        
+        // sanitize input
+        $firstname = $this->cleanVar($firstname, $conn);
+        $lastname  = $this->cleanVar($lastname, $conn);
+        $email     = $this->cleanVar($this->email, $conn);
+
+        $this->generateUserID($firstname,$lastname);      
+        $conn = Database::connect();
+        // uper case first letter
+        $firstname = ucfirst($firstname);
+        $lastname  = ucfirst($lastname);
+
+        $userID   =  $this->userID;
+        $email    =  $this->email;
+        $password =  $this->password;
+        // Hashed password to make it secure
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        // Inserting user details into users and userdetails tables
+        $queryUsers         = "INSERT INTO users (user_id,email,password)";
+        $queryUserdetails   = "INSERT INTO userdetails (user_id,firstname,lastname)";
+        $queryUsers        .= "VALUES ('$userID','$email','$hashedPassword')";
+        $queryUserdetails  .= "VALUES ('$userID','$firstname','$lastname')";
+        $resultUsers        = mysqli_query($conn, $queryUsers);
+        $resultUserdetails  = mysqli_query($conn, $queryUserdetails);
+        // checking if the query not failed
+        if(!$resultUsers || !$resultUserdetails){
+            die('Query failed ' . mysqli_error($conn));
+        }else{
+            // echo 'success <br>';
+        }
+        Database::disconnect($conn);  
     }
-    
+
     public static function loginUser($username,$password){
         //echo "USER : LoginUser!<br>";
         //This function will allow an existing user to log in, based on input username and input password. 
         //will essentially involve checking if the input password and the hashed password from the database, match. 
         //Should return TRUE if the login was successful, or FALSE otherwise. 
         $conn = Database::connect();
-        // reading from database
+        $doesPasswordMatch = FALSE;
+        $userdetails = [];
+        // selecting user details from users and userdetails table
         $query = "SELECT * FROM users, userdetails WHERE 
         users.user_id='$username' AND userdetails.user_id ='$username'
         OR email='$username' AND users.user_id = userdetails.user_id";
         // result of the query
         $result = mysqli_query($conn, $query);
-        // check success of the result and
-        // checking if have we have result
-        if($result && mysqli_num_rows($result) > 0){
+        
+        if(!$result){
+            die('Query failed ' . mysqli_error($conn));
+        }else{
             //  fetching a result row as an associative array
-            $userData = mysqli_fetch_assoc($result);
-            $userPassword = $userData['password'];
+            $userdetails = mysqli_fetch_assoc($result);
+            $userPassword = $userdetails['password'];
             // verify that given hash matches the user password
             if(password_verify($password, $userPassword)){
-                // setting session variables
-                 $_SESSION['user_id']   = $userData['user_id'];
-                 $_SESSION['email']     = $userData['email'];
-                 $_SESSION['firstname'] = $userData['firstname'];
-                 $_SESSION['lastname']  = $userData['lastname'];
-                 $_SESSION['useragent']  =  $_SERVER['HTTP_USER_AGENT'];
-                 $_SESSION['ip']        = $_SERVER['REMOTE_ADDR'];
-                 $_SESSION['isLogedIn'] = TRUE;
-                 
-                echo $_SESSION['user_id'] . '<br>';
-                echo $_SESSION['email'] . '<br>';
-                echo 'Your first name is '.$_SESSION['firstname'] . '<br>';
-                echo 'Your last name is '. $_SESSION['lastname'] . '<br>';
-                echo 'Your user agent is '. $_SESSION['useragent'] . '<br>';
-                echo $_SESSION['ip']; 
-                }else{
-                    // if password does not match
-                    echo "<span style='color:red;display:block;margin-left:42%;padding-top:100px;'>Wrong password! Please try again</span>";
+                // password match 
+                $doesPasswordMatch = TRUE;
             }
-        }else{
-            echo "<span style='color:red;display:block;margin-left:42%;padding-top:100px;'>Not a valid user name or email address</span>";
-        }
-        Database::disconnect($conn);  
+         }
+       Database::disconnect($conn);  
+       // return associative array with login status and user details
+       return array("isLoggedIn" => $doesPasswordMatch, "userdetails"=>$userdetails);
     }
+    
+
     // gernarating user id
     protected function generateUserID($firstname,$lastname){
         echo "User : In generateUsername<br>";
@@ -114,34 +122,37 @@ class User extends Database {
     
     protected function checkIfUserIDUnique($userID){
     /* write a function that checks on the database to see if the generated userID is unique. The function should return TRUE if generated userID is indeed unique, or FALSE otherwise. 
-    */
-        
+    */  
+         $userID = $this->userID;
+         // connecting to the database
+         $conn = Database::connect();
+    
+        // Select user id from users table
+        $query = "SELECT * FROM users WHERE user_id = '$userID'";
+         // querying the database
+        $result = mysqli_query($conn, $query);
+        $userID = mysqli_num_rows($result);
+         
+         if(!$result){
+             die('Query failed ' . mysqli_error($conn));
+         }
+         Database::disconnect($conn);
+         return $userID;
     }
 
         
     // Database methods
+    // adding user into database
     protected function addUserEntryinDB(){
-        $conn = Database::connect();
-        // uper case first letter
-        $firstname = ucfirst($this->firstname);
-        $lastname = ucfirst($this->lastname);
-        // Hashed password to make it secure
-        $hashed_password = password_hash($this->password, PASSWORD_DEFAULT);
-        $this->generateUserID($firstname,$lastname);
-        // Inserting user details into the database
-        $query = "INSERT INTO users (user_id,email,password)";
-        $query2 = "INSERT INTO userdetails (user_id,firstname,lastname)";
-        $query .= "VALUES ('$this->userID','$this->email','$hashed_password')";
-        $query2 .= "VALUES ('$this->userID','$firstname','$lastname')";
-        $result = mysqli_query($conn, $query);
-        $result2 = mysqli_query($conn, $query2);
-        // checking if the query success
-        if(!$result || !$result2){
-            die('User creation failed ' . mysqli_error($conn));
-        }else{
-            echo 'New user created <br>';
-        }
-        Database::disconnect($conn);
+        $firstname = $this->firstname;
+        $lastname  = $this->lastname;
+        $this->createUser($firstname,$lastname); 
+    }
+
+    public function saveUser(){
+           $this->addUserEntryinDB();
+           header("Location: login.php");
+           exit();
     }
     
     protected function updateUserPassword(){
@@ -149,30 +160,21 @@ class User extends Database {
     }
 
     // Check if account exists
-     public function isAccountExists($email){
+    public function isAccountExists($email){
         // connecting to the database
         $conn = Database::connect();
-        $checkUserEmail = $email;
-        // Query the database if the email already exist
-        $query = "SELECT * FROM users WHERE email = '$checkUserEmail'";
+        // Select email from users table
+        $query = "SELECT * FROM users WHERE email = '$email'";
         // querying the database
         $result = mysqli_query($conn, $query);
+        $checkEmail = mysqli_num_rows($result);
         
         if(!$result){
-            die('User creation failed ' . mysqli_error($conn));
-        }else{
-            // Get number of rows in the result set
-            if(mysqli_num_rows($result) > 0){
-                echo "<span style='color:red;display:block;margin-left:40%;padding-top:100px;'>Email already exists please use a different email</span>";
-            }else{
-                $this->addUserEntryinDB();
-                header("Location: login.php");
-            }
+            die('Query failed ' . mysqli_error($conn));
         }
         Database::disconnect($conn);
-        
+        return $checkEmail;
       }
 }//end class
 
 ?>
-
