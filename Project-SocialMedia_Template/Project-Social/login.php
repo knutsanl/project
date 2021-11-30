@@ -1,11 +1,8 @@
 <?php // login page
 require_once "classes/class_User.php";
 session_start();
-
-
     
 /* In this page, the user should be able to login into their respective profile. 
-
 Step 1 : 
 Here you should create a form for the user login. 
 The form should have 2 input fields, 1 button and 1 checkbox:
@@ -118,9 +115,8 @@ if(isset($_POST['submit'])){
         }
     }
 }
-
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -134,10 +130,17 @@ if(isset($_POST['submit'])){
     <div id="main">
         <h1>Sign In</h1>
         <form class="input" method="post">
+            <span style="color:green; margin-top:5px; font-size:large;">
+                <?php if(isset($_SESSION['success'])){
+                    echo '<b>' . $_SESSION['success'] . '</b>';
+                    unset($_SESSION['success']);
+                    }
+                ?>
+            </span>
             <span style="color:red; margin-top:5px;"><?php echo $errors['userOrpass']?></span>
             <span class="details">Username</span> 
             <input class="input" type="text" name="username" placeholder="Enter username or email address" 
-            value="<?php if(isset($_COOKIE['username'])){echo $_COOKIE['username'];}else{ echo $username;}?>" autofocus>
+                value="<?php if(isset($_COOKIE['username'])){echo $_COOKIE['username'];}else{ echo $username;}?>" autofocus>
             <span style="color:red; margin-top:5px;"><?php echo $errors['username']?></span>
             <span class="details">Password </span> 
             <input class="input" type="password" name="password" placeholder="Enter your password">
