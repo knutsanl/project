@@ -87,12 +87,12 @@ if(isset($_POST['submit'])){
         // echo 'error in the form';
     }else{
         if(!$user->isAccountExists($email)){
+            $_SESSION['success'] = 'Registration success please sign in';
             $user->saveUser();
         }else{
             $errors['emailExist'] = 'Email already exists please use a different email';
         } 
     }
-   
 }// end of the POST check
 
 ?>
